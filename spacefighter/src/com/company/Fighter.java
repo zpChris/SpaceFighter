@@ -36,7 +36,7 @@ public class Fighter implements ActionListener, KeyListener {
         dim = Toolkit.getDefaultToolkit().getScreenSize();
         jframe = new JFrame();
         jframe.setVisible(true);
-        jframe.setResizable(true);
+        jframe.setResizable(false);
         jframe.setSize(600, 600);
         jframe.setLocation(dim.width / 2 - jframe.getWidth() / 2, dim.height / 2 - jframe.getHeight() / 2);
         jframe.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
