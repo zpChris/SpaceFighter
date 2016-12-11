@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.Random;
 /*My next idea is to have multiple levels (probably easy, medium, and hard) where each level varies the amount of
@@ -26,9 +27,10 @@ public class Fighter implements ActionListener, KeyListener {
     public static ArrayList<Point> invaders = new ArrayList<Point>();
     public Timer timer = new Timer(20, this);
     public static final int SHIP_Y = 500, LENGTH = 5, LEFT = 0, RIGHT = 1, STAY = 2, SCALE = 10, WIDTH = 600;
-    public static int shipPositionX = (WIDTH/2) - (2*SCALE), direction = STAY, ticks = 0, timeBetweenBullets = 0, life = 10, score = 0, time = 0, ammo = 0, blinkTick = 0;
+    public static int shipPositionX = (WIDTH/2) - (2*SCALE), direction = STAY, ticks = 0, timeBetweenBullets = 0, life = 10, score = 0, time = 0, ammo = 0, blinkTick = 0, select = 1;
     public Dimension dim;
-    public static boolean over = false, paused = false, shooter = false, startGame = false, blink = true;
+    public static boolean over = false, paused = false, shooter = false, startGame = false, blink = true, prompt = false;
+    //prompt controlls many different things based on the current menu
     public Random random = new Random();
     public static int menu = 1;
 
@@ -73,15 +75,74 @@ public class Fighter implements ActionListener, KeyListener {
     @Override
     public void keyTyped(KeyEvent e) {
 
+
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
         int i = e.getKeyCode();
-        if (menu == 1) {
+        if (menu == 5) {
+            if (i == KeyEvent.VK_DOWN && select != 8) {
+                select++;
+            }
+            if (i == KeyEvent.VK_UP && select != 1) {
+                select--;
+            }
+            if (i == KeyEvent.VK_ENTER && select == 8) {
+                menu = 8;
+                start();
+                //the actual different levels of the game will be modified in the ActionListener method
+            }
+        } else if (menu == 3) {
+            if (i == KeyEvent.VK_DOWN && select != 3) {
+                select++;
+                blink = true;
+                blinkTick = 0;
+            }
+            if (i == KeyEvent.VK_UP && select != 1) {
+                select--;
+                blink = true;
+                blinkTick = 0;
+            }
             if (i == KeyEvent.VK_ENTER) {
                 menu = 8;
                 start();
+                //the actual different levels of the game will be modified in the ActionListener method
+            }
+        }
+        if (menu == 2) {
+            if (i == KeyEvent.VK_DOWN && select != 3) {
+                select++;
+                blink = true;
+                blinkTick = 0;
+            }
+            if (i == KeyEvent.VK_UP && select != 1) {
+                select--;
+                blink = true;
+                blinkTick = 0;
+            }
+            if (i == KeyEvent.VK_ENTER && select == 1) {
+                select = 1;
+                menu = 3;
+            }
+            if (i == KeyEvent.VK_ENTER && select == 3) {
+                select = 1;
+                menu = 5;
+            }
+        }
+        if (menu == 1) {
+            if (i == KeyEvent.VK_DOWN && select != 3) {
+                select++;
+                blink = true;
+                blinkTick = 0;
+            }
+            if (i == KeyEvent.VK_UP && select != 1) {
+                select--;
+                blink = true;
+                blinkTick = 0;
+            }
+            if (i == KeyEvent.VK_ENTER && select == 1) {
+                menu = 2;
             }
         }
         if (menu == 8) {
@@ -108,12 +169,13 @@ public class Fighter implements ActionListener, KeyListener {
                 over = true;
             }
         }
+
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
+        int i = e.getKeyCode();
         if (menu == 8) {
-            int i = e.getKeyCode();
             if (i == KeyEvent.VK_RIGHT) {
                 direction = STAY;
             }
@@ -124,6 +186,22 @@ public class Fighter implements ActionListener, KeyListener {
                 shooter = false;
             }
         }
+        //press H for home
+        if (i == KeyEvent.VK_H) {
+            select = 1;
+            if (menu == 8) {
+                prompt = true;
+            } else {
+                menu = 1;
+            }
+        }
+        if (i == KeyEvent.VK_ENTER && prompt) {
+            menu = 1;
+            select = 1;
+            prompt = false;
+        } else if (i == KeyEvent.VK_SPACE && prompt) {
+            prompt = false;
+        }
     }
 
     @Override
@@ -131,23 +209,21 @@ public class Fighter implements ActionListener, KeyListener {
         makeObj.repaint();
         ticks++;
         //the method to blink
-        if (menu == 1) {
-            blinkTick++;
-            if (blinkTick >= 40) {
-                if (blink) {
-                    blinkTick = 80;
-                }
-                blink = false;
-                blinkTick-=2;
-                if (blinkTick <= 40) {
-                    blinkTick = 0;
-                    blink = true;
-                }
-            }
 
+        blinkTick++;
+        if (blinkTick >= 40) {
+            if (blink) {
+                blinkTick = 80;
+            }
+            blink = false;
+            blinkTick-=2;
+            if (blinkTick <= 40) {
+                blinkTick = 0;
+                blink = true;
+            }
         }
         if (menu == 8) {
-            if (!over && !paused && ticks % 2 == 0) {
+            if (!over && !paused && ticks % 2 == 0 && !prompt) {
                 time++;
                 if (direction == LEFT && spaceship.get(0).x > 0) {
                     spaceship.remove(LENGTH - 1);
